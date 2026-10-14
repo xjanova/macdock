@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>MacDock</AssemblyName>
+    <RootNamespace>MacDock</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.0.0</Version>
+    <Product>MacDock</Product>
+    <Company>XMAN Studio</Company>
+    <Copyright>© 2026 XMAN Studio. All rights reserved.</Copyright>
+  </PropertyGroup>
+  <ItemGroup>
+    <Resource Include="Assets\xman-logo.png" />
+  </ItemGroup>
+</Project>

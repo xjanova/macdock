@@ -1,0 +1,38 @@
+﻿name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish single-file exe
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          dotnet publish MacDock.csproj -p:PublishProfile=Portable -p:Version=$version -o publish
+          if (-not (Test-Path publish\MacDock.exe)) { throw 'MacDock.exe was not produced' }
+          New-Item release -ItemType Directory -Force | Out-Null
+          $zip = "release\MacDock-$version-win-x64.zip"
+          Compress-Archive -Path publish\MacDock.exe -DestinationPath $zip
+          (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() + "  " + (Split-Path $zip -Leaf) | Set-Content "$zip.sha256"
+          "VERSION=$version" >> $env:GITHUB_ENV
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: MacDock v${{ env.VERSION }}
+          files: |
+            release/MacDock-*-win-x64.zip
+            release/MacDock-*-win-x64.zip.sha256
+          generate_release_notes: true

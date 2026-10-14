@@ -1,0 +1,9 @@
+﻿bin/
+obj/
+dist/
+release/
+*.user
+.vs/
+MacDock.settings.json
+.ui-shots/
+/.*.png
