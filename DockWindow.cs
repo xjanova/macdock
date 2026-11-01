@@ -815,24 +815,30 @@ namespace MacDock
 
         // ---------------------------------------------------------------- auto-hide
 
+        internal static bool IsAtRevealEdge(DockEdge edge, Native.POINT cursor, Native.RECT bounds)
+        {
+            // Bound both axes: an adjacent monitor can extend past any edge of this dock.
+            // A one-sided comparison would keep revealing it while the cursor is on that monitor.
+            if (cursor.X < bounds.Left || cursor.X >= bounds.Right ||
+                cursor.Y < bounds.Top || cursor.Y >= bounds.Bottom) return false;
+            switch (edge)
+            {
+                case DockEdge.Bottom: return cursor.Y >= bounds.Bottom - 2;
+                case DockEdge.Top: return cursor.Y < bounds.Top + 2;
+                case DockEdge.Left: return cursor.X < bounds.Left + 2;
+                default: return cursor.X >= bounds.Right - 2;
+            }
+        }
+
         void EdgeTick()
         {
             if (_hwnd == IntPtr.Zero || _ww == 0) return;
             if (!_s.AutoHide) { if (_hidden) ShowDock(); return; }
-            Native.GetCursorPos(out var cp);
+            if (!Native.GetCursorPos(out var cp)) return;
             if (_hidden)
             {
-                int sw = Native.GetSystemMetrics(0), sh = Native.GetSystemMetrics(1);
-                bool inX = cp.X >= _wx && cp.X < _wx + _ww, inY = cp.Y >= _wy && cp.Y < _wy + _wh;
-                bool hit;
-                switch (_s.Edge)
-                {
-                    case DockEdge.Bottom: hit = inX && cp.Y >= sh - 2; break;
-                    case DockEdge.Top: hit = inX && cp.Y <= 1; break;
-                    case DockEdge.Left: hit = inY && cp.X <= 1; break;
-                    default: hit = inY && cp.X >= sw - 2; break;
-                }
-                if (hit) ShowDock();
+                var bounds = new Native.RECT { Left = _wx, Top = _wy, Right = _wx + _ww, Bottom = _wy + _wh };
+                if (IsAtRevealEdge(_s.Edge, cp, bounds)) ShowDock();
                 return;
             }
             bool over = cp.X >= _wx && cp.X < _wx + _ww && cp.Y >= _wy && cp.Y < _wy + _wh;
